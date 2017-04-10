@@ -19,8 +19,8 @@ class AllArticles(scrapy.Spider):
     # 爬取指定天数，通过range(n)指定天数
     def parse(self, response):
         # 用arrow指定日期区间
-        start = datetime.datetime(2017, 4, 1)
-        end = datetime.datetime(2017, 4, 2)
+        start = datetime.datetime(2017, 3, 1)
+        end = datetime.datetime(2017, 3, 31)
         c_date = arrow.now()
         c_ym = c_date.format('YYYY-MM')
         c_d = c_date.format('DD')

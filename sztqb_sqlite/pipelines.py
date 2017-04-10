@@ -16,7 +16,7 @@ class SztqbSqlitePipeline(object):
 
             # SQLite的placeholder是问号[?]，非[%s]。
             # 表名是table201703，表名不能为纯数字！
-            sql = "insert into table201703(title,publish,link,text) values (?,?,?,?)"
+            sql = "insert into table201702(title,publish,link,text) values (?,?,?,?)"
 
             # 此处最后的逗号[,]不能少
             cur.execute(sql, (item['title'], item['publish'], item['link'], item['text'],))
