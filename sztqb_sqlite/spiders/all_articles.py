@@ -64,5 +64,16 @@ class AllArticles(scrapy.Spider):
         item = response.meta['item']
         data = response.body
         soup = BeautifulSoup(data, "html5lib")
-        item['text'] = soup.find('founder-content').get_text()
+
+        # 情况1：去除所有空白和换行，即无视<p>和<h>等等标签
+        # item['text'] = soup.find('founder-content').get_text()
+
+        # 情况2：保留<p>作为换行符（分段符）
+        temp = "\n    "
+        ps = soup.find('founder-content').find_all('p')
+        for p in ps:
+            temp += p.get_text()
+            temp += "\n    "
+        item['text'] = temp
+
         yield item
