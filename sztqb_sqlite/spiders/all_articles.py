@@ -16,27 +16,20 @@ class AllArticles(scrapy.Spider):
         "http://sztqb.sznews.com"
     ]
 
-    # 爬取指定天数，通过range(n)指定天数
+    # 爬取指定天数的报纸
     def parse(self, response):
-        # 用arrow指定日期区间
         start = datetime.datetime(2017, 3, 1)
         end = datetime.datetime(2017, 3, 31)
-        c_date = arrow.now()
-        c_ym = c_date.format('YYYY-MM')
-        c_d = c_date.format('DD')
-        url = "http://sztqb.sznews.com/html/" + c_ym + "/" + c_d + "/node_642.htm"
-        yield url
         for r in arrow.Arrow.range('day', start, end):
-            c_ym = r.format('YYYY-MM')
-            c_d = r.format('DD')
-            url = "http://sztqb.sznews.com/html/" + c_ym + "/" + c_d + "/node_642.htm"
+            year_month = r.format('YYYY-MM')
+            day = r.format('DD')
+            url = "http://sztqb.sznews.com/html/" + year_month + "/" + day + "/node_642.htm"
             yield scrapy.Request(url, callback=self.parse_item)
 
     # 爬取当天所有非广告、天气或公告的文章
     def parse_item(self, response):
         data = response.body
         soup = BeautifulSoup(data, "html5lib")
-        # 找出所有<table>标签
         ts = soup.find('div', attrs={"style": "height:730px; overflow-y:scroll; width:100%;"}) \
             .find_all('table',
                       width="100%",
@@ -44,7 +37,6 @@ class AllArticles(scrapy.Spider):
                       cellspacing="1",
                       cellpadding="0")
         for t in ts:
-            # 找出所有<a>标签
             als = t.find('table', cellspacing="0", cellpadding="1", border="0").tbody.find_all('a')
             for al in als:
                 item = SztqbSqliteItem()
@@ -56,24 +48,19 @@ class AllArticles(scrapy.Spider):
                     item['publish'] = soup.find('table', id="logoTable"). \
                         find('td', width="204", align="center", valign="top").get_text()
                     request_article = scrapy.Request(link, callback=self.parse_article)
+                    # 不同parse()之间传递item值需要meta['item']
                     request_article.meta['item'] = item
                     yield request_article
 
-    # 爬取某篇文章正文内容
+    # 爬取某一篇文章正文内容
     def parse_article(self, response):
         item = response.meta['item']
         data = response.body
         soup = BeautifulSoup(data, "html5lib")
-
-        # 情况1：去除所有空白和换行，即无视<p>和<h>等等标签
-        # item['text'] = soup.find('founder-content').get_text()
-
-        # 情况2：保留<p>作为换行符（分段符）
         temp = "\n    "
         ps = soup.find('founder-content').find_all('p')
         for p in ps:
             temp += p.get_text()
             temp += "\n    "
         item['text'] = temp
-
         yield item
