@@ -10,7 +10,7 @@ from ..items import SztqbSqliteItem
 
 
 class AllArticles(scrapy.Spider):
-    name = "pub"
+    name = "all"
     allowed_domains = ["sznews.com"]
     start_urls = [
         "http://sztqb.sznews.com"
@@ -18,7 +18,7 @@ class AllArticles(scrapy.Spider):
 
     # 爬取指定天数的报纸
     def parse(self, response):
-        start = datetime.datetime(2017, 5, 1)
+        start = datetime.datetime(2017, 4, 29)
         end = datetime.datetime(2017, 5, 1)
         for r in arrow.Arrow.range('day', start, end):
             year_month = r.format('YYYY-MM')

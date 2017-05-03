@@ -10,7 +10,7 @@ from ..items import SztqbSqliteItem
 
 
 class AllArticles(scrapy.Spider):
-    name = "all"
+    name = "test"
     allowed_domains = ["sznews.com"]
     start_urls = [
         "http://sztqb.sznews.com"
