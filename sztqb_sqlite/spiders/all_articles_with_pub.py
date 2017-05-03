@@ -18,8 +18,8 @@ class AllArticles(scrapy.Spider):
 
     # 爬取指定天数的报纸
     def parse(self, response):
-        start = datetime.datetime(2017, 4, 29)
-        end = datetime.datetime(2017, 5, 1)
+        start = datetime.datetime(2017, 5, 1)
+        end = datetime.datetime(2017, 5, 2)
         for r in arrow.Arrow.range('day', start, end):
             year_month = r.format('YYYY-MM')
             day = r.format('DD')
@@ -58,12 +58,19 @@ class AllArticles(scrapy.Spider):
         item = response.meta['item']
         data = response.body
         soup = BeautifulSoup(data, "html5lib")
-        temp = "\n    "
+        text = ""
+        ts = soup.find('div', style="height:900px; overflow-y:scroll; width:100%;").find('tbody').find_all('tr',
+                                                                                                           valign='top')
+        temp = "    "
+        for t in ts:
+            if t.get_text() is not None:
+                temp += t.get_text() + '\n\n    '
+        text += temp
         ps = soup.find('founder-content').find_all('p')
         for p in ps:
-            temp += p.get_text()
-            temp += "\n    "
-        item['text'] = temp
+            text += p.get_text()
+            text += "\n\n    "
+        item['text'] = text
         publish = item["publish"]
         pub = soup.find("table", width=413, border=0, cellpadding=5, cellspacing=0, style="MARGIN-BOTTOM: 3px") \
             .find("strong")
